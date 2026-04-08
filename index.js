@@ -55,7 +55,7 @@ client.on('ready', () => {
   cron.schedule('0 13 * * *', () => enviar("Amor, almuerzo ❤️"), zonacol);
 
   // 🕕 6:15 PM (Corregido de 25 a 18 horas)
-  cron.schedule('36 18 * * *', () => enviar("Hola amor soy una IA"), zonacol);
+  cron.schedule('40 18 * * *', () => enviar("Hola amor soy una IA"), zonacol);
 
   cron.schedule('0 21 * * *', () => enviar("Amor, hora de comer ❤️"), zonacol);
   cron.schedule('0 22 * * *', () => enviar("Amor, no olvides las pastillitas 💊"), zonacol);
