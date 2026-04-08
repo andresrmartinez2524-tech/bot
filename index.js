@@ -10,14 +10,19 @@ const port = process.env.PORT || 3000;
 
 // Configuración del Cliente
 const client = new Client({
-  authStrategy: new LocalAuth(),
-  puppeteer: {
-    headless: true,
-    args: [
-      '--no-sandbox',
-      '--disable-setuid-sandbox'
-    ]
-  }
+    puppeteer: {
+        headless: true,
+        args: [
+            '--no-sandbox',
+            '--disable-setuid-sandbox',
+            '--disable-dev-shm-usage',
+            '--disable-accelerated-2d-canvas',
+            '--no-first-run',
+            '--no-zygote',
+            '--single-process', // Esto ayuda mucho en Railway
+            '--disable-gpu'
+        ],
+    }
 });
 
 // 📱 Manejo del QR
@@ -45,7 +50,7 @@ client.on('ready', () => {
   cron.schedule('0 9 * * *', () => enviar("Amor, hora de ir al gym 💪"));
   cron.schedule('0 10 * * *', () => enviar("Amor, hora de desayunar ☕"));
   cron.schedule('0 13 * * *', () => enviar("Amor, almuerzo ❤️"));
-  cron.schedule('0 18 * * *', () => enviar("Hola mi amor te amo mucho soy una IA"));
+ cron.schedule('15 18 * * *', () =>  enviar("Hola mi amor te amo mucho soy una IA"));
   cron.schedule('0 21 * * *', () => enviar("Amor, hora de comer ❤️"));
   cron.schedule('0 22 * * *', () => enviar("Amor, no olvides las pastillitas 💊"));
 
