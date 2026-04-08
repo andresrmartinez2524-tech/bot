@@ -50,6 +50,8 @@ client.on('qr', async (qr) => {
 // 🚀 Bot listo
 client.on('ready', () => {
   console.log('Bot listo ✅');
+  console.log('Enviando mensaje de prueba...');
+  enviar("¡Hola! Soy una ia");
 
   // ===== MENSAJES DIARIOS =====
   cron.schedule('0 8 * * *', () => enviar("Amor, recuerda los probióticos 💊"));
