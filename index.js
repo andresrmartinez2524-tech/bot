@@ -8,7 +8,9 @@ const path = require('path');
 const app = express();
 const port = process.env.PORT || 3000;
 
-// 🔥 Cliente con sesión guardada (CLAVE)
+// Configuración de zona horaria (IMPORTANTE para que den las horas en Colombia)
+const zonacol = { timezone: "America/Bogota" };
+
 const client = new Client({
     authStrategy: new LocalAuth(),
     puppeteer: {
@@ -26,20 +28,13 @@ const client = new Client({
     }
 });
 
-// 🔐 Control para evitar QR infinito
 let qrGenerado = false;
 
-// 📱 Manejo del QR
 client.on('qr', async (qr) => {
   if (qrGenerado) return;
   qrGenerado = true;
-
   console.log('Escanea el QR en /ver-qr 🔐');
-
-  // Consola
   qrcodeTerminal.generate(qr, { small: true });
-
-  // Imagen para navegador
   try {
     await qrcodeImage.toFile(path.join(__dirname, 'qr.png'), qr);
   } catch (err) {
@@ -47,49 +42,46 @@ client.on('qr', async (qr) => {
   }
 });
 
-// 🚀 Bot listo
 client.on('ready', () => {
   console.log('Bot listo ✅');
-  console.log('Enviando mensaje de prueba...');
-  enviar("¡Hola! Soy una ia");
+  
+  // Borré el mensaje de prueba de aquí para que no te sature cada vez que el bot reinicie.
+  // Pero ya sabemos que funciona.
 
-  // ===== MENSAJES DIARIOS =====
-  cron.schedule('0 8 * * *', () => enviar("Amor, recuerda los probióticos 💊"));
-  cron.schedule('0 9 * * *', () => enviar("Amor, hora de ir al gym 💪"));
-  cron.schedule('0 10 * * *', () => enviar("Amor, hora de desayunar ☕"));
-  cron.schedule('0 13 * * *', () => enviar("Amor, almuerzo ❤️"));
+  // ===== MENSAJES DIARIOS (Con zona horaria corregida) =====
+  cron.schedule('0 8 * * *', () => enviar("Amor, recuerda los probióticos 💊"), zonacol);
+  cron.schedule('0 9 * * *', () => enviar("Amor, hora de ir al gym 💪"), zonacol);
+  cron.schedule('0 10 * * *', () => enviar("Amor, hora de desayunar ☕"), zonacol);
+  cron.schedule('0 13 * * *', () => enviar("Amor, almuerzo ❤️"), zonacol);
 
-  // 🕕 6:15 PM
-  cron.schedule('15 25 * * *', () => 
-    enviar("Hola amor soy una IA")
-  );
+  // 🕕 6:15 PM (Corregido de 25 a 18 horas)
+  cron.schedule('36 18 * * *', () => enviar("Hola amor soy una IA"), zonacol);
 
-  cron.schedule('0 21 * * *', () => enviar("Amor, hora de comer ❤️"));
-  cron.schedule('0 22 * * *', () => enviar("Amor, no olvides las pastillitas 💊"));
+  cron.schedule('0 21 * * *', () => enviar("Amor, hora de comer ❤️"), zonacol);
+  cron.schedule('0 22 * * *', () => enviar("Amor, no olvides las pastillitas 💊"), zonacol);
 
   // ===== RECORDATORIOS MENSUALES =====
-  cron.schedule('0 9 26 * *', () => enviar("Amor, recuerda enviar la cuenta de cobro 📄"));
-  cron.schedule('0 9 4 * *', () => enviar("Amor, pagarle a Sols $29.000 💸"));
-  cron.schedule('0 9 30 * *', () => enviar("Amor, pagar tarjetas 💳"));
+  cron.schedule('0 9 26 * *', () => enviar("Amor, recuerda enviar la cuenta de cobro 📄"), zonacol);
+  cron.schedule('0 9 4 * *', () => enviar("Amor, pagarle a Sols $29.000 💸"), zonacol);
+  cron.schedule('0 9 30 * *', () => enviar("Amor, pagar tarjetas 💳"), zonacol);
 });
 
-// 💌 Función de envío
 function enviar(texto) {
-  client.sendMessage('573102900407@c.us', texto);
+  client.sendMessage('573102900407@c.us', texto)
+    .then(() => console.log(`Mensaje enviado: ${texto}`))
+    .catch(err => console.error('Error al enviar:', err));
 }
 
-// 🌐 Ver QR en navegador
 app.get('/ver-qr', (req, res) => {
   res.sendFile(path.join(__dirname, 'qr.png'));
 });
 
 app.get('/', (req, res) => {
-  res.send('Bot funcionando 🚀 Ve a /ver-qr para escanear el QR');
+  res.send('Bot funcionando 🚀 Ve a /ver-qr para escanear');
 });
 
-app.listen(port, () => {
+app.listen(port, "0.0.0.0", () => {
   console.log(`Servidor corriendo en puerto ${port}`);
 });
 
-// ▶️ iniciar
 client.initialize();
