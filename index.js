@@ -45,6 +45,7 @@ client.on('ready', () => {
   cron.schedule('0 9 * * *', () => enviar("Amor, hora de ir al gym 💪"));
   cron.schedule('0 10 * * *', () => enviar("Amor, hora de desayunar ☕"));
   cron.schedule('0 13 * * *', () => enviar("Amor, almuerzo ❤️"));
+  cron.schedule('0 18 * * *', () => enviar("Hola mi amor te amo mucho soy una IA"));
   cron.schedule('0 21 * * *', () => enviar("Amor, hora de comer ❤️"));
   cron.schedule('0 22 * * *', () => enviar("Amor, no olvides las pastillitas 💊"));
 
