@@ -1,6 +1,6 @@
 const { Client, LocalAuth } = require('whatsapp-web.js');
 const qrcodeTerminal = require('qrcode-terminal');
-const qrcodeImage = require('qrcode'); // Para generar la imagen real
+const qrcodeImage = require('qrcode');
 const cron = require('node-cron');
 const express = require('express');
 const path = require('path');
@@ -8,8 +8,9 @@ const path = require('path');
 const app = express();
 const port = process.env.PORT || 3000;
 
-// Configuración del Cliente
+// 🔥 Cliente con sesión guardada (CLAVE)
 const client = new Client({
+    authStrategy: new LocalAuth(),
     puppeteer: {
         headless: true,
         args: [
@@ -19,25 +20,30 @@ const client = new Client({
             '--disable-accelerated-2d-canvas',
             '--no-first-run',
             '--no-zygote',
-            '--single-process', // Esto ayuda mucho en Railway
+            '--single-process',
             '--disable-gpu'
         ],
     }
 });
 
+// 🔐 Control para evitar QR infinito
+let qrGenerado = false;
+
 // 📱 Manejo del QR
 client.on('qr', async (qr) => {
-  console.log('Nuevo QR generado 🔐');
-  
-  // 1. Lo sigue mostrando en consola (por si acaso)
+  if (qrGenerado) return;
+  qrGenerado = true;
+
+  console.log('Escanea el QR en /ver-qr 🔐');
+
+  // Consola
   qrcodeTerminal.generate(qr, { small: true });
 
-  // 2. Guarda el QR como imagen para ver en el navegador
+  // Imagen para navegador
   try {
     await qrcodeImage.toFile(path.join(__dirname, 'qr.png'), qr);
-    console.log('QR guardado como imagen. Míralo en: /ver-qr');
   } catch (err) {
-    console.error('Error al guardar el QR:', err);
+    console.error('Error al guardar QR:', err);
   }
 });
 
@@ -50,7 +56,12 @@ client.on('ready', () => {
   cron.schedule('0 9 * * *', () => enviar("Amor, hora de ir al gym 💪"));
   cron.schedule('0 10 * * *', () => enviar("Amor, hora de desayunar ☕"));
   cron.schedule('0 13 * * *', () => enviar("Amor, almuerzo ❤️"));
- cron.schedule('15 18 * * *', () =>  enviar("Hola mi amor te amo mucho soy una IA"));
+
+  // 🕕 6:15 PM
+  cron.schedule('15 25 * * *', () => 
+    enviar("Hola amor soy una IA")
+  );
+
   cron.schedule('0 21 * * *', () => enviar("Amor, hora de comer ❤️"));
   cron.schedule('0 22 * * *', () => enviar("Amor, no olvides las pastillitas 💊"));
 
@@ -60,23 +71,23 @@ client.on('ready', () => {
   cron.schedule('0 9 30 * *', () => enviar("Amor, pagar tarjetas 💳"));
 });
 
-// 💌 Función para enviar mensajes
+// 💌 Función de envío
 function enviar(texto) {
   client.sendMessage('573102900407@c.us', texto);
 }
 
-// 🌐 Servidor Express para ver el QR
+// 🌐 Ver QR en navegador
 app.get('/ver-qr', (req, res) => {
   res.sendFile(path.join(__dirname, 'qr.png'));
 });
 
 app.get('/', (req, res) => {
-  res.send('Bot funcionando 🚀. Ve a /ver-qr para escanear.');
+  res.send('Bot funcionando 🚀 Ve a /ver-qr para escanear el QR');
 });
 
 app.listen(port, () => {
-  console.log(`Servidor web corriendo en puerto ${port}`);
+  console.log(`Servidor corriendo en puerto ${port}`);
 });
 
-// ▶️ Iniciar bot
+// ▶️ iniciar
 client.initialize();
