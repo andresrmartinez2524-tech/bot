@@ -28,10 +28,10 @@ const client = new Client({
 });
 
 let qrGenerado = false;
-let isReady = false; // Nueva bandera para saber si el bot está conectado
+let isReady = false;
+let cronIniciado = false; // 🔥 ESTA ES LA CLAVE
 
 client.on('qr', async (qr) => {
-    // Si ya estamos listos, no necesitamos generar más QRs
     if (isReady) return; 
     
     console.log('Escanea el QR en /ver-qr 🔐');
@@ -46,18 +46,21 @@ client.on('qr', async (qr) => {
 client.on('ready', () => {
     console.log('Bot listo ✅');
     isReady = true;
+
+    // 🔥 EVITA DUPLICADOS
+    if (cronIniciado) return;
+    cronIniciado = true;
     
     // ===== MENSAJES DIARIOS =====
-    cron.schedule('0 8 * * *', () => enviar("Amor, recuerda los probióticos 💊"), zonacol);
-    cron.schedule('0 9 * * *', () => enviar("Amor, hora de ir al gym 💪"), zonacol);
-    cron.schedule('0 10 * * *', () => enviar("Amor, hora de desayunar ☕"), zonacol);
-    cron.schedule('0 13 * * *', () => enviar("Amor, almuerzo ❤️"), zonacol);
-    cron.schedule('0 21 * * *', () => enviar("Amor, hora de comer ❤️"), zonacol);
-      cron.schedule('30 21 * * *', () => enviar("Amor, hora de comer ❤️"), zonacol);
-        cron.schedule('32 21 * * *', () => enviar("Amor, hora de comer ❤️"), zonacol);
-          cron.schedule('34 21 * * *', () => enviar("Amor, hora de comer ❤️"), zonacol);
-            cron.schedule('36 21 * * *', () => enviar("Amor, hora de comer ❤️"), zonacol);
-    cron.schedule('0 22 * * *', () => enviar("Amor, no olvides las pastillitas 💊"), zonacol);
+    cron.schedule('0 8 * * *', () => enviar("Amor tómate los probióticos po favooo daleeeeee!!!!"), zonacol);
+    cron.schedule('0 9 * * *', () => enviar("Amor, ve al gym, ese qlito no crece solo jeje 🤤"), zonacol);
+    cron.schedule('0 10 * * *', () => enviar("Amor, hora de desayunar plis, mas atenta"), zonacol);
+    cron.schedule('0 13 * * *', () => enviar("Amor y el almuerzoooo?? come, no?"), zonacol);
+    cron.schedule('0 21 * * *', () => enviar("Amor, son las 9 y nada que comes???? ok."), zonacol);
+    cron.schedule('0 22 * * *', () => enviar("Amor tomate la pastilla o después me haces papá jeje"), zonacol);
+
+    cron.schedule('40 19 * * *', () => enviar("Hola soy un bot"), zonacol);
+
 
     // ===== RECORDATORIOS MENSUALES =====
     cron.schedule('0 9 26 * *', () => enviar("Amor, recuerda enviar la cuenta de cobro 📄"), zonacol);
@@ -65,15 +68,13 @@ client.on('ready', () => {
     cron.schedule('0 9 30 * *', () => enviar("Amor, pagar tarjetas 💳"), zonacol);
 });
 
-// Manejo de desconexión para evitar errores de ejecución
 client.on('disconnected', (reason) => {
     console.log('Cliente desconectado ❌:', reason);
     isReady = false;
-    client.initialize(); // Intenta reconectar
+    client.initialize();
 });
 
 async function enviar(texto) {
-    // Si el cliente no está listo, evitamos el error de "Detached Frame"
     if (!isReady) {
         console.log('Intento de envío fallido: El cliente no está listo o la sesión se cerró.');
         return;
@@ -84,7 +85,6 @@ async function enviar(texto) {
         console.log(`Mensaje enviado con éxito: ${texto}`);
     } catch (err) {
         console.error('Error crítico al enviar mensaje:', err.message);
-        // Si detectamos que el frame se perdió, marcamos como no listo
         if (err.message.includes('detached Frame')) {
             isReady = false;
         }
